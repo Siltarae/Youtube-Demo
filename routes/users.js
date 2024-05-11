@@ -33,10 +33,8 @@ router.post("/join", (req, res) => {
   const values = [email, name, password, contact];
 
   if (email && name && password) {
-    conn.query(sql, values, () => {
-      res.status(201).json({
-        message: "회원가입이 완료되었습니다.",
-      });
+    conn.query(sql, values, (err, results) => {
+      res.status(201).json(results);
     });
   } else {
     res.status(400).json({
