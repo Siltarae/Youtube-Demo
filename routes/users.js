@@ -4,6 +4,13 @@ const router = express.Router();
 const conn = require("../mariadb");
 const { body, param, validationResult } = require("express-validator");
 
+//jwt 모듈
+const jwt = require("jsonwebtoken");
+
+//dotenv모듈
+const dotenv = require("dotenv");
+dotenv.config();
+
 router.use(express.json());
 
 function validate(req, res, next) {
@@ -35,11 +42,24 @@ router.post(
 
       let loginUser = results[0];
       if (loginUser) {
+        const token = jwt.sign(
+          {
+            email: loginUser.email,
+            name: loginUser.name,
+          },
+          process.env.PRIVATE_KEY,
+          { expiresIn: "30m", issuer: "songa" }
+        );
+
+        res.cookie("token", token, { httpOnly: true });
+
+        console.log(token);
+
         res.status(200).json({
           message: `${loginUser.name}님 로그인 되었습니다.`,
         });
       } else {
-        res.status(404).json({
+        res.status(403).json({
           message: "아이디 또는 비밀번호가 일치하지 않습니다.",
         });
       }
